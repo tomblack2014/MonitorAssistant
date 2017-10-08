@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<MonitorAssistant>
+	<Member cnt="1">
+		<mem0 name="tom" parTimes = "5" lastTime = "2017/9/26 18:35:00"/>
+		<cam1 path="F:\code\APITest" name="2"/>
+		<cam2 path="F:\code\APITest" name="3"/>
+	</Member>
+</MonitorAssistant>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Assistant.h"
+
 class App
 {
 public:
@@ -7,4 +9,6 @@ public:
 
 private:
 	void PrintHelp();
+
+	Assistant _asst;
 };
