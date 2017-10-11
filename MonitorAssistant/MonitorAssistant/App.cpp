@@ -26,11 +26,12 @@ void App::Run()
 		}
 		//添加一名成员
 		else if (cmd == "-a" || cmd == "add") {
-			string name, lastTime;
+			string name, lastTimeP1, lastTimeP2;
 			int parTimes;
-			cin >> name >> parTimes >> lastTime;
+			cin >> name >> parTimes >> lastTimeP1 >> lastTimeP2;
 			tm tm_t;
-			sscanf_s(lastTime.c_str(), "%d-%d-%d %d:%d:%d", &tm_t.tm_year, &tm_t.tm_mon, &tm_t.tm_mday, &tm_t.tm_hour, &tm_t.tm_min, &tm_t.tm_sec);
+			sscanf_s(lastTimeP1.c_str(), "%d-%d-%d", &tm_t.tm_year, &tm_t.tm_mon, &tm_t.tm_mday);
+			sscanf_s(lastTimeP2.c_str(), "%d:%d:%d", &tm_t.tm_hour, &tm_t.tm_min, &tm_t.tm_sec);
 			_asst.AddMember(name, parTimes, tm_t);
 		}
 		//删除一名成员
@@ -39,6 +40,8 @@ void App::Run()
 			cin >> name;
 			if (!_asst.DeleteMember(name))
 				cout << "delete failed." << endl;
+			else
+				cout << "delete " << name << " succeed." << endl;
 		}
 		//决策n名工作者
 		else if (cmd == "-dc" || cmd == "decide") {
@@ -71,7 +74,7 @@ void App::Run()
 				cout << "accepted!" << endl;
 			}
 		}
-		else if (cmd == "-e"){
+		else if (cmd == "-r"){
 			int num = 0;
 			cout << "please input the member number." << endl;
 			cin >> num;
@@ -106,12 +109,16 @@ void App::Run()
 
 void App::PrintHelp()
 {
-	cout << "welcome to MonitorAssistant!" << endl
-		<< "-h         show a Help list" << endl
-		<< "-a		   Add a new member to this system" << endl
-		<< "-d		   Delete a member" << endl
-		<< "-dc		   DeCide a list of members to participate the activity" << endl
-		<< "-ac		   ACcept the last decision" << endl
-		<< "-s		   Show messages of members" << endl
-		<< "-c		   Clear the screen" << endl;
+	cout << "**************************************************************************************************************" << endl
+		<< "* welcome to MonitorAssistant!" << endl
+		<< "* -h		   show a Help list(none param)" << endl
+		<< "* -a		   Add a new member to this system( name(string) parTime(int) lastTime(string, ""y-m-d h:m:s"") )" << endl
+		<< "* -d		   Delete a member( name(string) )" << endl
+		<< "* -dc		   DeCide a list of members to participate the activity( num(int) )" << endl
+		<< "* -ac		   ACcept the last decision(none param)" << endl
+		<< "* -r		   Regist the participation of members( num(int) name(string * num))" << endl
+		<< "* -s		   Show messages of members(none param)" << endl
+		<< "* -c		   Clear the screen(none param)" << endl
+		<< "**************************************************************************************************************" << endl
+		<< endl;
 }

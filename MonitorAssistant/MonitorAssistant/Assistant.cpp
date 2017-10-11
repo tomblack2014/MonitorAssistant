@@ -6,6 +6,7 @@
 #include <sstream>
 #include <time.h>
 #include <algorithm>
+#include <vector>
 
 using namespace std;
 
@@ -66,6 +67,7 @@ bool Assistant::Load()
 						member._name = element->Attribute("name");
 						member._parTimes = atoi(element->Attribute("parTimes"));
 						member._lastTime = StringToDatetime(element->Attribute("lastTime"));
+						_members.push_back(member);
 					}
 				}
 			}
@@ -98,6 +100,9 @@ bool Assistant::Save()
 			return false;
 		}
 		else {
+			while (memElement->FirstChild()) {
+				memElement->RemoveChild(memElement->FirstChild());
+			}
 			int memCount = _members.size();
 			memElement->SetAttribute("cnt", memCount);
 
@@ -106,27 +111,32 @@ bool Assistant::Save()
 				stringstream sstream;
 				sstream.str("");
 				sstream << "mem" << i;
-				TiXmlElement* element = memElement->FirstChildElement(sstream.str().c_str())->ToElement();
-				if (element == NULL) {
+				TiXmlElement* element;
+				
+				if (memElement->FirstChildElement(sstream.str().c_str())) {
+					element = memElement->FirstChildElement(sstream.str().c_str())->ToElement();
+					element->SetAttribute("name", iter->_name.c_str());
+					element->SetAttribute("parTimes", iter->_parTimes);
+					char str[20] = { 0 };
+					strftime(str, 20, "%Y/%m/%d %H:%M:%S", &iter->_lastTime);
+					element->SetAttribute("lastTime", str);
+				}
+				else {
 					element = new TiXmlElement(sstream.str().c_str());
 					element->SetAttribute("name", iter->_name.c_str());
 					element->SetAttribute("parTimes", iter->_parTimes);
-					char str[20] = { 0 };
-					strftime(str, 20, "%Y/%m/%d %H:%M:%S", &iter->_lastTime);
+					char str[100] = { 0 };
+					strftime(str, 100, "%Y/%m/%d %H:%M:%S", &iter->_lastTime);
 					element->SetAttribute("lastTime", str);
 					memElement->LinkEndChild(element);
 				}
-				else {
-					element->SetAttribute("name", iter->_name.c_str());
-					element->SetAttribute("parTimes", iter->_parTimes);
-					char str[20] = { 0 };
-					strftime(str, 20, "%Y/%m/%d %H:%M:%S", &iter->_lastTime);
-					element->SetAttribute("lastTime", str);
-				}
+
 				iter++;
 			}
 		}
 	}
+
+	xmlDocument.SaveFile(_configName.c_str());
 }
 
 //添加一名成员
@@ -138,6 +148,8 @@ void Assistant::AddMember(const string& name, int parTimes, const tm& lastTime)
 	newMeb._lastTime = lastTime;
 
 	_members.push_back(newMeb);
+
+	Save();
 }
 
 //删除一名成员
@@ -151,10 +163,12 @@ bool Assistant::DeleteMember(const string& name)
 			break;
 		}
 	}
-	return ret;
+	if (!ret)
+		return false;
+	return Save();
 }
 
-bool operator > (tm t1, tm t2) 
+bool operator > (tm t1, tm t2)
 {
 	return mktime(&t1) > mktime(&t2);
 }
@@ -166,21 +180,29 @@ bool Assistant::Decide(int memNum, list<string>& nameList)
 		return false;
 	}
 
-	auto func = [](const Member& l, const Member& r)
+	auto sortFunc = [](const Member& l, const Member& r)
 	{
-
 		return l._parTimes != r._parTimes
 			? l._parTimes > r._parTimes
 			: l._lastTime > r._lastTime;
 	};
 
-	//排序取前memNum
-	std::sort(_members.begin(), _members.end(), func);
+	_members.sort(sortFunc);
+
+	//std::vector<Member> vec;
+
+	////排序取前memNum
+	//std::sort(vec.begin(), vec.end(), [](const Member& l, const Member& r)
+	//{
+	//	return l._parTimes != r._parTimes
+	//		? l._parTimes > r._parTimes
+	//		: l._lastTime > r._lastTime;
+	//});
 
 	nameList.clear();
 	_updateList = _members;
 	auto iter = _updateList.begin();
-	
+
 	for (int i = 0; i < memNum; i++) {
 		iter->_parTimes++;
 		iter->_lastTime = GetTimeNow();
